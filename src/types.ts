@@ -18,12 +18,13 @@ export type UploadProgressSubject<T> = {
 };
 
 export type UploadOptions = {
-  subject: UploadProgressSubject<HttpProgressEvent>;
+  subject?: UploadProgressSubject<HttpProgressEvent>;
   chunkSize?: number;
   params?: Record<string, unknown>;
   path?: string;
   method?: HTTPRequestMethods;
   name?: string;
+  mimeType?: string;
 };
 
 export type HTTPRequestMethods =
