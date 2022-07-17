@@ -69,5 +69,12 @@
     },
     "dependencies": {
         "@azlabsjs/requests": "^0.1.7"
+    },
+    "publishConfig": {
+        "registry": "https://npm.pkg.github.com/@azlabsjs"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/azlabsjs/uploader.git"
     }
 }
