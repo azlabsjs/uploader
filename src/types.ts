@@ -1,4 +1,10 @@
-import { HttpProgressEvent } from '@azlabsjs/requests';
+import {
+  HttpRequest,
+  HttpResponse,
+  Interceptor,
+  RequestClient,
+  HttpProgressEvent,
+} from '@azlabsjs/requests';
 
 // @internal
 type StreamDataHandlerFunc = (result?: any) => void;
@@ -17,14 +23,61 @@ export type UploadProgressSubject<T> = {
   next: (value: T) => void;
 };
 
-export type UploadOptions = {
+export type UploadOptions<T, R> = {
+  /**
+   * Subject object that allow clients to listen to upload progress event
+   * @property
+   */
   subject?: UploadProgressSubject<HttpProgressEvent>;
+
+  /**
+   * For client sending file to server as chunk, this property when set can be used
+   * by implementation class slice file in chunks
+   * @property
+   */
   chunkSize?: number;
+  /**
+   * Additional attributes to add to the request form when sending the upload request
+   * @property
+   */
   params?: Record<string, unknown>;
+
+  /**
+   * Path to server upload resources
+   */
   path?: string;
+  /**
+   * HTTP verb to use when sending request
+   * 
+   * @property
+   */
   method?: HTTPRequestMethods;
+  /**
+   * Name property of the file being uploaded to backend server
+   * @property
+   */
   name?: string;
+  /**
+   * The mime type may be used internally by the implementation object
+   * to validate the file mimetye before sending it to backend server
+   * @property
+   */
   mimeType?: string;
+  /**
+   * The backend property must be used to modify the backend request client
+   * used by the uploader object when sending request to file server
+   *
+   * @property
+   */
+  backend?: RequestClient<T, R> | string;
+
+  /**
+   * Defines an interceptor object may modify the upload request. The interceptor
+   * function can be use to transform request options, headers, etc...
+   * 
+   * @property
+   */
+  interceptor?: Interceptor<T>;
 };
 
 export type HTTPRequestMethods =

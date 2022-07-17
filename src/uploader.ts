@@ -73,24 +73,20 @@ function requestClient(endpoint?: string) {
  * @todos
  * - Add chunk-upload implementation support to the uploader object
  *
- * @param backend
  * @param options
  */
-export function Uploader(
-  backend?: RequestClient<HttpRequest, HttpResponse> | string,
-  options?: UploadOptions
-) {
+export function Uploader(options?: UploadOptions<HttpRequest, HttpResponse>) {
   let client!: RequestClient<HttpRequest, HttpResponse>;
-  if (typeof backend === 'undefined' || backend === null) {
+  if (typeof options?.backend === 'undefined' || options?.backend === null) {
     client = requestClient();
   }
 
-  if (typeof backend === 'string') {
-    client = requestClient(backend);
+  if (typeof options?.backend === 'string') {
+    client = requestClient(options?.backend);
   }
 
-  if (typeof backend === 'object') {
-    client = backend;
+  if (typeof options?.backend === 'object') {
+    client = options?.backend;
   }
 
   if (typeof client.request !== 'function') {
@@ -173,9 +169,13 @@ export function Uploader(
             },
             responseType: 'text',
             headers: {
-              Accept: 'application/json',
+              Accept: '*/*',
             },
-            interceptors: _interceptors,
+            interceptors: [
+              ..._interceptors.concat(
+                ...(options?.interceptor ? [options?.interceptor] : [])
+              ),
+            ],
           },
         });
         if (response.ok) {
@@ -190,6 +190,5 @@ export function Uploader(
       }
     },
   });
-
   return uploadClient;
 }
