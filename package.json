@@ -1,0 +1,73 @@
+{
+    "version": "0.1.0",
+    "license": "MIT",
+    "main": "dist/index.js",
+    "typings": "dist/types/index.d.ts",
+    "files": [
+        "dist/**/*"
+    ],
+    "engines": {
+        "node": ">=14"
+    },
+    "scripts": {
+        "build": "ts-build build",
+        "lint": "ts-build lint",
+        "prepare": "git config core.hookspath .githooks && ts-build build",
+        "size": "size-limit",
+        "analyze": "size-limit --why",
+        "test": "jest",
+        "betterer": "betterer --strict",
+        "prettier": "prettier --write src/**/*"
+    },
+    "husky": {
+        "hooks": {
+            "pre-commit": "eslint"
+        }
+    },
+    "prettier": {
+        "printWidth": 80,
+        "semi": true,
+        "singleQuote": true,
+        "trailingComma": "es5"
+    },
+    "exports": {
+        ".": {
+            "import": "./dist/esm/index.js",
+            "require": "./dist/cjs/index.js",
+            "default": "./dist/cjs/index.js"
+        }
+    },
+    "name": "uploader",
+    "author": "azandrew-sidoine",
+    "module": "dist/esm/index.js",
+    "size-limit": [
+        {
+            "path": "dist/cjs/index.js",
+            "limit": "10 KB"
+        },
+        {
+            "path": "dist/esm/index.js",
+            "limit": "10 KB"
+        }
+    ],
+    "devDependencies": {
+        "@azlabsjs/ts-build": "^0.1.14",
+        "@betterer/cli": "^5.3.6",
+        "@betterer/typescript": "^5.3.6",
+        "@size-limit/preset-small-lib": "^7.0.8",
+        "@types/jest": "^28.1.5",
+        "@typescript-eslint/eslint-plugin": "^5.30.6",
+        "@typescript-eslint/parser": "^5.30.6",
+        "husky": "^8.0.1",
+        "jest": "^28.1.3",
+        "jest-watch-typeahead": "^2.0.0",
+        "prettier": "^2.7.1",
+        "size-limit": "^7.0.8",
+        "ts-jest": "^28.0.6",
+        "tslib": "^2.4.0",
+        "typescript": "^4.7.4"
+    },
+    "dependencies": {
+        "@azlabsjs/requests": "^0.1.7"
+    }
+}
