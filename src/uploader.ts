@@ -9,7 +9,12 @@ import {
 } from '@azlabsjs/requests';
 import { blobToFile } from './browser-api';
 import { isReadableStream, streamToBlob } from './node-api';
-import { NodeStream, UploaderInterface, UploadOptions } from './types';
+import {
+  NodeStream,
+  UploaderInterface,
+  UploaderRequestOptions,
+  UploadOptions,
+} from './types';
 
 // @internal
 async function prepareRequestBody(
@@ -67,7 +72,8 @@ function requestClient(endpoint?: string) {
 }
 
 /**
- * Creates an upload client for sending files to storage server
+ * Factory function that creates a file uploader, that upload files to 
+ * HTTP servers using HTTP standard protocol
  *
  * **Note**
  * @todos
@@ -76,6 +82,7 @@ function requestClient(endpoint?: string) {
  * @param options
  */
 export function Uploader(options?: UploadOptions<HttpRequest, HttpResponse>) {
+
   let client!: RequestClient<HttpRequest, HttpResponse>;
   if (typeof options?.backend === 'undefined' || options?.backend === null) {
     client = requestClient();
@@ -97,7 +104,9 @@ export function Uploader(options?: UploadOptions<HttpRequest, HttpResponse>) {
   // Creates the upload client instance
   // We simply use a javascript object instance instead of creating a class
   // for simplicity reason
-  const uploadClient = { options: {} } as UploaderInterface;
+  const uploadClient = { options: {} } as UploaderInterface & {
+    options: UploaderRequestOptions;
+  };
 
   Object.defineProperty(uploadClient, 'useBearerToken', {
     value: (token: string) => {
@@ -115,7 +124,7 @@ export function Uploader(options?: UploadOptions<HttpRequest, HttpResponse>) {
 
   // Upload method
   Object.defineProperty(uploadClient, 'upload', {
-    value: async (data: Blob | File | NodeStream) => {
+    value: async <R>(data: Blob | File | NodeStream) => {
       // Create request client
       const _interceptors = [] as Interceptor<HttpRequest>[];
       if (
@@ -179,7 +188,7 @@ export function Uploader(options?: UploadOptions<HttpRequest, HttpResponse>) {
           },
         });
         if (response.ok) {
-          return response.response;
+          return response.response as any as R;
         }
         throw response.response;
       } catch (error) {
@@ -190,5 +199,5 @@ export function Uploader(options?: UploadOptions<HttpRequest, HttpResponse>) {
       }
     },
   });
-  return uploadClient;
+  return uploadClient as UploaderInterface;
 }

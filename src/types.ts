@@ -108,6 +108,12 @@ export type UploaderRequestOptions = {
  * Defines the uploader object type
  */
 export type UploaderInterface = {
-  options: UploaderRequestOptions;
-  upload: <T>(data: Blob | File | NodeStream) => Promise<T>;
+  /**
+   * Provides a contract for sending files to server instance
+   * Implementation object might provide the protocol to use when sending 
+   * file to server depending on the server implemenation
+   * 
+   * @method
+   */
+  upload: <R>(data: Blob | File | NodeStream) => Promise<R>;
 };
