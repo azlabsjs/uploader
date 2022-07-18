@@ -4,7 +4,12 @@ import {
   HttpProgressEvent,
 } from '@azlabsjs/requests';
 
-type RequestResponseType = "arraybuffer" | "blob" | "document" | "json" | "text";
+type RequestResponseType =
+  | 'arraybuffer'
+  | 'blob'
+  | 'document'
+  | 'json'
+  | 'text';
 
 // @internal
 type StreamDataHandlerFunc = (result?: any) => void;
@@ -48,7 +53,7 @@ export type UploadOptions<T, R> = {
   path?: string;
   /**
    * HTTP verb to use when sending request
-   * 
+   *
    * @property
    */
   method?: HTTPRequestMethods;
@@ -74,7 +79,7 @@ export type UploadOptions<T, R> = {
   /**
    * Defines an interceptor object may modify the upload request. The interceptor
    * function can be use to transform request options, headers, etc...
-   * 
+   *
    * @property
    */
   interceptor?: Interceptor<T>;
@@ -82,7 +87,7 @@ export type UploadOptions<T, R> = {
   /**
    * The response type expected from the request server. By default a text response
    * type is used allowing user to decode it if needed.
-   * 
+   *
    * @property
    */
   responseType?: RequestResponseType;
@@ -118,10 +123,10 @@ export type UploaderRequestOptions = {
 export type UploaderInterface = {
   /**
    * Provides a contract for sending files to server instance
-   * Implementation object might provide the protocol to use when sending 
+   * Implementation object might provide the protocol to use when sending
    * file to server depending on the server implemenation
-   * 
+   *
    * @method
    */
-  upload: <R>(data: Blob | File | NodeStream) => Promise<R>;
+  upload: <R>(data: Blob | File | NodeStream | string) => Promise<R>;
 };

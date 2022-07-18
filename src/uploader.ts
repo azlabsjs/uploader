@@ -7,7 +7,7 @@ import {
   useRequestClient,
   fetchBackendController,
 } from '@azlabsjs/requests';
-import { blobToFile } from './browser-api';
+import { blobToFile, dataURItoBlob } from './browser-api';
 import { isReadableStream, streamToBlob } from './node-api';
 import {
   NodeStream,
@@ -18,7 +18,7 @@ import {
 
 // @internal
 export async function prepareRequestBody(
-  data: FormData | Blob | File | NodeStream,
+  data: FormData | Blob | File | NodeStream | string,
   name?: string,
   params?: Record<string, any>
 ) {
@@ -30,6 +30,8 @@ export async function prepareRequestBody(
     body = data;
   } else if (data instanceof File) {
     body = data;
+  } else if (typeof data === 'string' && data.substring(0, 5) === 'data:') {
+    body = blobToFile(dataURItoBlob(data));
   } else if (data instanceof Blob) {
     body = blobToFile(data);
   } else if (isReadableStream(data)) {
@@ -126,22 +128,27 @@ export function Uploader(options?: UploadOptions<HttpRequest, HttpResponse>) {
 
   // Upload method
   Object.defineProperty(uploadClient, 'upload', {
-    value: async <R>(data: Blob | File | NodeStream) => {
+    value: async <R>(data: Blob | File | NodeStream | string) => {
       // Create request client
       const _interceptors = [] as Interceptor<HttpRequest>[];
       if (
         typeof uploadClient.options.basicAuth !== 'undefined' ||
         uploadClient.options.basicAuth !== null
       ) {
+        const makeBase64Str = (value: string) => {
+          typeof Buffer !== 'undefined'
+            ? Buffer.from(value).toString('base64')
+            : btoa(value);
+        };
         _interceptors.push((request, next) => {
           request = request.clone({
             options: {
               ...request.options,
               headers: {
                 ...request.options?.headers,
-                Authorization: `Basic ${Buffer.from(
+                Authorization: `Basic ${makeBase64Str(
                   `${uploadClient.options.basicAuth?.user}:${uploadClient.options.basicAuth?.password}`
-                ).toString('base64')}`,
+                )}`,
               },
             },
           });

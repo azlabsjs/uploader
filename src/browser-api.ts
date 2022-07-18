@@ -1,10 +1,42 @@
 type ReadAsType = 'binary' | 'text' | 'arraybuffer' | 'dataurl';
 
 /**
+ * Base64 encoded string to Blob object
+ *
+ * @param dataURI
+ */
+export function dataURItoBlob(dataURI: string) {
+  // convert base64 to raw binary data held in a string
+  // doesn't handle URLEncoded DataURIs - see SO answer #6850276 for code that does this
+  const base64StrComponents = dataURI.split(',');
+  const bytes =
+    typeof Buffer !== 'undefined'
+      ? Buffer.from(base64StrComponents[1], 'base64').toString('latin1')
+      : atob(base64StrComponents[1]);
+
+  // separate out the mime component
+  const mime = base64StrComponents[0].split(':')[1].split(';')[0];
+
+  // write the bytes of the string to an ArrayBuffer
+  const buffer = new ArrayBuffer(bytes.length);
+
+  // create a view into the buffer
+  const binary = new Uint8Array(buffer);
+
+  // set the bytes of the buffer to the correct values
+  for (let i = 0; i < bytes.length; i++) {
+    binary[i] = bytes.charCodeAt(i);
+  }
+
+  // write the ArrayBuffer to a blob, and you're done
+  return new Blob([buffer], { type: mime });
+}
+
+/**
  * Converts browser Blob object to a File object
  *
  * // @internal
- * 
+ *
  * @param blob
  */
 export function blobToFile(blob: Blob) {
