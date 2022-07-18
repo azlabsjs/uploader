@@ -2,6 +2,7 @@
     "version": "0.1.4",
     "license": "MIT",
     "main": "dist/index.js",
+    "module": "dist/esm/index.mjs",
     "typings": "dist/types/index.d.ts",
     "files": [
         "dist/**/*"
@@ -32,26 +33,25 @@
     },
     "exports": {
         ".": {
-            "import": "./dist/esm/index.js",
-            "require": "./dist/cjs/index.js",
-            "default": "./dist/cjs/index.js"
+            "import": "./dist/esm/index.mjs",
+            "require": "./dist/cjs/index.cjs",
+            "default": "./dist/cjs/index.cjs"
         }
     },
     "name": "@azlabsjs/uploader",
     "author": "azandrew-sidoine",
-    "module": "dist/esm/index.js",
     "size-limit": [
         {
-            "path": "dist/cjs/index.js",
+            "path": "dist/cjs/index.cjs",
             "limit": "10 KB"
         },
         {
-            "path": "dist/esm/index.js",
+            "path": "dist/esm/index.mjs",
             "limit": "10 KB"
         }
     ],
     "devDependencies": {
-        "@azlabsjs/ts-build": "^0.1.14",
+        "@azlabsjs/ts-build": "^0.1.15",
         "@betterer/cli": "^5.3.6",
         "@betterer/typescript": "^5.3.6",
         "@size-limit/preset-small-lib": "^7.0.8",
