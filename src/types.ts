@@ -1,6 +1,4 @@
 import {
-  HttpRequest,
-  HttpResponse,
   Interceptor,
   RequestClient,
   HttpProgressEvent,
