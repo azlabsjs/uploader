@@ -4,6 +4,8 @@ import {
   HttpProgressEvent,
 } from '@azlabsjs/requests';
 
+type RequestResponseType = ""| "arraybuffer" | "blob" | "document" | "json" | "text";
+
 // @internal
 type StreamDataHandlerFunc = (result?: any) => void;
 
@@ -76,6 +78,14 @@ export type UploadOptions<T, R> = {
    * @property
    */
   interceptor?: Interceptor<T>;
+
+  /**
+   * The response type expected from the request server. By default a text response
+   * type is used allowing user to decode it if needed.
+   * 
+   * @property
+   */
+  responseType?: RequestResponseType;
 };
 
 export type HTTPRequestMethods =

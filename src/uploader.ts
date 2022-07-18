@@ -44,21 +44,21 @@ export async function prepareRequestBody(
   // We check if the request body is a form data. If so, we append the parameters
   // to the form data object
   if (isFormData && hasParams) {
-      for (const key in params) {
-          (body as FormData).append(key, params[key]);
-      }
-      return body;
+    for (const key in params) {
+      (body as FormData).append(key, params[key]);
+    }
+    return body;
   } else if (hasParams) {
-      // Case parameters are provided, we simply add the parameters to a record of string
-      // of form data entry
-      const _body = { [name ?? 'file']: body } as Record<string, any>;
-      for (const key in params) {
-          _body[key] = params[key];
-      }
-      return _body;
+    // Case parameters are provided, we simply add the parameters to a record of string
+    // of form data entry
+    const _body = { [name ?? 'file']: body } as Record<string, any>;
+    for (const key in params) {
+      _body[key] = params[key];
+    }
+    return _body;
   } else {
-      // Final name case, we simply update the body
-      return { [name ?? 'file']: body } as Record<string, any>;
+    // Final name case, we simply update the body
+    return { [name ?? 'file']: body } as Record<string, any>;
   }
 }
 
@@ -165,13 +165,12 @@ export function Uploader(options?: UploadOptions<HttpRequest, HttpResponse>) {
           return next(request);
         });
       }
+      const body = await prepareRequestBody(data, options?.name, options?.params);
       try {
         const response = await client.request({
           url: options?.path || '/',
           method: options?.method ?? 'POST',
-          body:
-            prepareRequestBody(data, options?.name, options?.params) ??
-            undefined,
+          body: body ?? undefined,
           options: {
             onProgress: (event) => {
               if (options?.subject) {
