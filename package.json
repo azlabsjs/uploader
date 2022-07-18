@@ -51,7 +51,7 @@
         }
     ],
     "devDependencies": {
-        "@azlabsjs/ts-build": "^0.1.15",
+        "@azlabsjs/ts-build": "^0.1.16",
         "@betterer/cli": "^5.3.6",
         "@betterer/typescript": "^5.3.6",
         "@size-limit/preset-small-lib": "^7.0.8",
