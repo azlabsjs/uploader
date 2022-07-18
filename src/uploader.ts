@@ -17,24 +17,19 @@ import {
 } from './types';
 
 // @internal
-async function prepareRequestBody(
+export async function prepareRequestBody(
   data: FormData | Blob | File | NodeStream,
   name?: string,
   params?: Record<string, any>
 ) {
   // Initialize body to a null object by default
-  let body!:
-    | FormData
-    | Record<string, FormDataEntryValue>
-    | File
-    | NodeStream
-    | Blob;
+  let body!: FormData | File | NodeStream | Blob;
   // Save instanceof formData result in temporary variable to be used later
   const isFormData = data instanceof FormData;
   if (isFormData) {
     body = data;
   } else if (data instanceof File) {
-    body = { [name ?? 'file']: data };
+    body = data;
   } else if (data instanceof Blob) {
     body = blobToFile(data);
   } else if (isReadableStream(data)) {
@@ -46,17 +41,25 @@ async function prepareRequestBody(
     );
   }
   const hasParams = typeof params !== 'undefined' && typeof params === 'object';
+  // We check if the request body is a form data. If so, we append the parameters
+  // to the form data object
   if (isFormData && hasParams) {
-    for (const key in params) {
-      (body as FormData).append(key, params[key]);
-    }
+      for (const key in params) {
+          (body as FormData).append(key, params[key]);
+      }
+      return body;
   } else if (hasParams) {
-    body = { [name ?? 'file']: body } as Record<string, any>;
-    for (const key in params) {
-      body[key] = params[key];
-    }
+      // Case parameters are provided, we simply add the parameters to a record of string
+      // of form data entry
+      const _body = { [name ?? 'file']: body } as Record<string, any>;
+      for (const key in params) {
+          _body[key] = params[key];
+      }
+      return _body;
+  } else {
+      // Final name case, we simply update the body
+      return { [name ?? 'file']: body } as Record<string, any>;
   }
-  return body;
 }
 
 // @internal
@@ -72,7 +75,7 @@ function requestClient(endpoint?: string) {
 }
 
 /**
- * Factory function that creates a file uploader, that upload files to 
+ * Factory function that creates a file uploader, that upload files to
  * HTTP servers using HTTP standard protocol
  *
  * **Note**
@@ -82,7 +85,6 @@ function requestClient(endpoint?: string) {
  * @param options
  */
 export function Uploader(options?: UploadOptions<HttpRequest, HttpResponse>) {
-
   let client!: RequestClient<HttpRequest, HttpResponse>;
   if (typeof options?.backend === 'undefined' || options?.backend === null) {
     client = requestClient();
