@@ -165,7 +165,11 @@ export function Uploader(options?: UploadOptions<HttpRequest, HttpResponse>) {
           return next(request);
         });
       }
-      const body = await prepareRequestBody(data, options?.name, options?.params);
+      const body = await prepareRequestBody(
+        data,
+        options?.name,
+        options?.params
+      );
       try {
         const response = await client.request({
           url: options?.path || '/',
@@ -177,9 +181,10 @@ export function Uploader(options?: UploadOptions<HttpRequest, HttpResponse>) {
                 options?.subject.next(event);
               }
             },
-            responseType: 'text',
+            responseType: options?.responseType ?? 'text',
             headers: {
-              Accept: '*/*',
+              Accept:
+                options?.responseType === 'json' ? 'application/json' : '*/*',
             },
             interceptors: [
               ..._interceptors.concat(

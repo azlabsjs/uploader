@@ -4,7 +4,7 @@ import {
   HttpProgressEvent,
 } from '@azlabsjs/requests';
 
-type RequestResponseType = ""| "arraybuffer" | "blob" | "document" | "json" | "text";
+type RequestResponseType = "arraybuffer" | "blob" | "document" | "json" | "text";
 
 // @internal
 type StreamDataHandlerFunc = (result?: any) => void;
