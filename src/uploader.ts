@@ -218,9 +218,7 @@ export function Uploader(options?: UploadOptions<HttpRequest, HttpResponse>) {
         }
         throw response.response;
       } catch (error) {
-        if (typeof error === 'object') {
-          throw (error as any)?.error;
-        }
+        console.log(error);
         throw error;
       }
     },
