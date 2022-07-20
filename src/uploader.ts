@@ -16,6 +16,12 @@ import {
   UploadOptions,
 } from './types';
 
+type UploaderClientType = UploaderInterface & {
+  options: UploaderRequestOptions;
+  useBearerToken: (token: string) => UploaderClientType;
+  useBasicAuthorization: (user: string, password: string) => UploaderClientType;
+};
+
 // @internal
 export async function prepareRequestBody(
   data: FormData | Blob | File | NodeStream | string,
@@ -108,9 +114,7 @@ export function Uploader(options?: UploadOptions<HttpRequest, HttpResponse>) {
   // Creates the upload client instance
   // We simply use a javascript object instance instead of creating a class
   // for simplicity reason
-  const uploadClient = { options: {} } as UploaderInterface & {
-    options: UploaderRequestOptions;
-  };
+  let uploadClient = { options: {} } as UploaderClientType;
 
   Object.defineProperty(uploadClient, 'useBearerToken', {
     value: (token: string) => {
@@ -206,11 +210,20 @@ export function Uploader(options?: UploadOptions<HttpRequest, HttpResponse>) {
         throw response.response;
       } catch (error) {
         if (typeof error === 'object') {
-          throw new Error((error as any)?.error);
+          throw (error as any)?.error;
         }
         throw error;
       }
     },
   });
+
+  // In case basic authentication configuration is provided by the caller
+  // We call the userBasicAuthorization function on the client
+  if (options?.basicAuth && typeof uploadClient.useBasicAuthorization === 'function') {
+    uploadClient = uploadClient.useBasicAuthorization(
+      options.basicAuth.user,
+      options.basicAuth.password
+    );
+  }
   return uploadClient as UploaderInterface;
 }

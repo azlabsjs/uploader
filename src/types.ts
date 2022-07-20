@@ -91,6 +91,17 @@ export type UploadOptions<T, R> = {
    * @property
    */
   responseType?: RequestResponseType;
+
+  /**
+   * Configuration for basic authentication for apis protected
+   * by a basic authorization gateway
+   * 
+   * @property
+   */
+  basicAuth?: {
+    user: string;
+    password: string;
+  };
 };
 
 export type HTTPRequestMethods =
