@@ -6,9 +6,12 @@ import {
   RequestClient,
   useRequestClient,
   fetchBackendController,
+  RequestProgressEvent,
 } from '@azlabsjs/requests';
+
 import { blobToFile, dataURItoBlob } from './browser-api';
 import { isReadableStream, streamToBlob } from './node-api';
+
 import {
   NodeStream,
   UploaderInterface,
@@ -132,7 +135,10 @@ export function Uploader(options?: UploadOptions<HttpRequest, HttpResponse>) {
 
   // Upload method
   Object.defineProperty(uploadClient, 'upload', {
-    value: async <R>(data: Blob | File | NodeStream | string) => {
+    value: async <R>(
+      data: Blob | File | NodeStream | string,
+      progressObserver?: (event: RequestProgressEvent) => void
+    ) => {
       // Create request client
       const _interceptors = [] as Interceptor<HttpRequest>[];
       if (
@@ -191,6 +197,9 @@ export function Uploader(options?: UploadOptions<HttpRequest, HttpResponse>) {
               if (options?.subject) {
                 options?.subject.next(event);
               }
+              if (progressObserver) {
+                progressObserver(event);
+              }
             },
             responseType: options?.responseType ?? 'text',
             headers: {
@@ -219,7 +228,10 @@ export function Uploader(options?: UploadOptions<HttpRequest, HttpResponse>) {
 
   // In case basic authentication configuration is provided by the caller
   // We call the userBasicAuthorization function on the client
-  if (options?.basicAuth && typeof uploadClient.useBasicAuthorization === 'function') {
+  if (
+    options?.basicAuth &&
+    typeof uploadClient.useBasicAuthorization === 'function'
+  ) {
     uploadClient = uploadClient.useBasicAuthorization(
       options.basicAuth.user,
       options.basicAuth.password

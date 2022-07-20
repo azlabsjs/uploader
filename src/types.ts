@@ -1,7 +1,7 @@
 import {
   Interceptor,
   RequestClient,
-  HttpProgressEvent,
+  RequestProgressEvent,
 } from '@azlabsjs/requests';
 
 type RequestResponseType =
@@ -33,7 +33,7 @@ export type UploadOptions<T, R> = {
    * Subject object that allow clients to listen to upload progress event
    * @property
    */
-  subject?: UploadProgressSubject<HttpProgressEvent>;
+  subject?: UploadProgressSubject<RequestProgressEvent>;
 
   /**
    * For client sending file to server as chunk, this property when set can be used
