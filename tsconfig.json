@@ -32,6 +32,9 @@
       "forceConsistentCasingInFileNames": true,
       "noEmit": true,
       // Directory where typescript output declaration files
-      "declarationDir": "./dist/types"
+      "declarationDir": "./dist/types",
+
+      // Remove comments from the compiled code
+      "removeComments": true
     }
   }

@@ -141,3 +141,10 @@ export type UploaderInterface = {
    */
   upload: <R>(data: Blob | File | NodeStream | string) => Promise<R>;
 };
+
+// @internal
+export type UploaderClientType = UploaderInterface & {
+  options: UploaderRequestOptions;
+  useBearerToken: (token: string) => UploaderClientType;
+  useBasicAuthorization: (user: string, password: string) => UploaderClientType;
+};

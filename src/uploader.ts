@@ -14,16 +14,10 @@ import { isReadableStream, streamToBlob } from './node-api';
 
 import {
   NodeStream,
+  UploaderClientType,
   UploaderInterface,
-  UploaderRequestOptions,
   UploadOptions,
 } from './types';
-
-type UploaderClientType = UploaderInterface & {
-  options: UploaderRequestOptions;
-  useBearerToken: (token: string) => UploaderClientType;
-  useBasicAuthorization: (user: string, password: string) => UploaderClientType;
-};
 
 // @internal
 export async function prepareRequestBody(
@@ -34,7 +28,8 @@ export async function prepareRequestBody(
   // Initialize body to a null object by default
   let body!: FormData | File | NodeStream | Blob;
   // Save instanceof formData result in temporary variable to be used later
-  const isFormData = data instanceof FormData;
+  const isFormData =
+    typeof FormData !== 'undefined' && data instanceof FormData;
   if (isFormData) {
     body = data;
   } else if (data instanceof File) {
@@ -85,39 +80,14 @@ function requestClient(endpoint?: string) {
   );
 }
 
-/**
- * Factory function that creates a file uploader, that upload files to
- * HTTP servers using HTTP standard protocol
- *
- * **Note**
- * @todos
- * - Add chunk-upload implementation support to the uploader object
- *
- * @param options
- */
-export function Uploader(options?: UploadOptions<HttpRequest, HttpResponse>) {
-  let client!: RequestClient<HttpRequest, HttpResponse>;
-  if (typeof options?.backend === 'undefined' || options?.backend === null) {
-    client = requestClient();
-  }
-
-  if (typeof options?.backend === 'string') {
-    client = requestClient(options?.backend);
-  }
-
-  if (typeof options?.backend === 'object') {
-    client = options?.backend;
-  }
-
-  if (typeof client.request !== 'function') {
-    throw new Error(
-      'Uploader request client must be of type import("@azlabsjs/requests").RequestClient or defines request() method with same definition as RequestClient one'
-    );
-  }
+// @internal
+function uploadClientFactory(
+  options?: UploadOptions<HttpRequest, HttpResponse>
+) {
   // Creates the upload client instance
   // We simply use a javascript object instance instead of creating a class
   // for simplicity reason
-  let uploadClient = { options: {} } as UploaderClientType;
+  const uploadClient = { options: {} } as UploaderClientType;
 
   Object.defineProperty(uploadClient, 'useBearerToken', {
     value: (token: string) => {
@@ -139,7 +109,31 @@ export function Uploader(options?: UploadOptions<HttpRequest, HttpResponse>) {
       data: Blob | File | NodeStream | string,
       progressObserver?: (event: RequestProgressEvent) => void
     ) => {
-      // Create request client
+      //#region Create request client
+      let client!: RequestClient<HttpRequest, HttpResponse>;
+      if (
+        typeof options?.backend === 'undefined' ||
+        options?.backend === null
+      ) {
+        client = requestClient();
+      }
+
+      if (typeof options?.backend === 'string') {
+        client = requestClient(options?.backend);
+      }
+
+      if (typeof options?.backend === 'object') {
+        client = options?.backend;
+      }
+
+      if (typeof client.request !== 'function') {
+        throw new Error(
+          'Uploader request client must be of type import("@azlabsjs/requests").RequestClient or defines request() method with same definition as RequestClient one'
+        );
+      }
+      //#endregion Creates request client
+
+      //#region Add request interceptors
       const _interceptors = [] as Interceptor<HttpRequest>[];
       if (
         typeof uploadClient.options.basicAuth !== 'undefined' ||
@@ -182,12 +176,17 @@ export function Uploader(options?: UploadOptions<HttpRequest, HttpResponse>) {
           return next(request);
         });
       }
+      //#endregion Add request interceptors
+
+      //#region Prepare request body
       const body = await prepareRequestBody(
         data,
         options?.name,
         options?.params
       );
+      //#endregion Prepare request body
       try {
+        // #region Send the request to the server
         const response = await client.request({
           url: options?.path || '/',
           method: options?.method ?? 'POST',
@@ -217,13 +216,29 @@ export function Uploader(options?: UploadOptions<HttpRequest, HttpResponse>) {
           return response.response as any as R;
         }
         throw response.response;
+        //#region Send the request to the server
       } catch (error) {
         console.log(error);
         throw error;
       }
     },
   });
+  return uploadClient;
+}
 
+/**
+ * Factory function that creates a file uploader, that upload files to
+ * HTTP servers using HTTP standard protocol
+ *
+ * **Note**
+ * @todos
+ * - Add chunk-upload implementation support to the uploader object
+ *
+ * @param options
+ */
+export function Uploader(options?: UploadOptions<HttpRequest, HttpResponse>) {
+  // Creates the upload client instance
+  let uploadClient = uploadClientFactory(options);
   // In case basic authentication configuration is provided by the caller
   // We call the userBasicAuthorization function on the client
   if (
