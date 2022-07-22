@@ -75,6 +75,6 @@
         "url": "https://github.com/azlabsjs/uploader.git"
     },
     "dependencies": {
-        "@azlabsjs/requests": "^0.1.12"
+        "@azlabsjs/requests": "^0.1.15"
     }
 }
