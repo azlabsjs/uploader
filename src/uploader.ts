@@ -1,12 +1,13 @@
 import {
   xhrBackendController,
-  HttpRequest,
-  HttpResponse,
+  HTTPRequest,
+  HTTPResponse,
   Interceptor,
   RequestClient,
   useRequestClient,
   fetchBackendController,
   RequestProgressEvent,
+  HTTPErrorResponse,
 } from '@azlabsjs/requests';
 
 import { blobToFile, dataURItoBlob } from './browser-api';
@@ -82,7 +83,7 @@ function requestClient(endpoint?: string) {
 
 // @internal
 function uploadClientFactory(
-  options?: UploadOptions<HttpRequest, HttpResponse>
+  options?: UploadOptions<HTTPRequest, HTTPResponse>
 ) {
   // Creates the upload client instance
   // We simply use a javascript object instance instead of creating a class
@@ -110,7 +111,7 @@ function uploadClientFactory(
       progressObserver?: (event: RequestProgressEvent) => void
     ) => {
       //#region Create request client
-      let client!: RequestClient<HttpRequest, HttpResponse>;
+      let client!: RequestClient<HTTPRequest, HTTPResponse>;
       if (
         typeof options?.backend === 'undefined' ||
         options?.backend === null
@@ -134,7 +135,7 @@ function uploadClientFactory(
       //#endregion Creates request client
 
       //#region Add request interceptors
-      const _interceptors = [] as Interceptor<HttpRequest>[];
+      const _interceptors = [] as Interceptor<HTTPRequest>[];
       if (
         typeof uploadClient.options.basicAuth !== 'undefined' ||
         uploadClient.options.basicAuth !== null
@@ -185,42 +186,37 @@ function uploadClientFactory(
         options?.params
       );
       //#endregion Prepare request body
-      try {
-        // #region Send the request to the server
-        const response = await client.request({
-          url: options?.path || '/',
-          method: options?.method ?? 'POST',
-          body: body ?? undefined,
-          options: {
-            onProgress: (event) => {
-              if (options?.subject) {
-                options?.subject.next(event);
-              }
-              if (progressObserver) {
-                progressObserver(event);
-              }
-            },
-            responseType: options?.responseType ?? 'text',
-            headers: {
-              Accept:
-                options?.responseType === 'json' ? 'application/json' : '*/*',
-            },
-            interceptors: [
-              ..._interceptors.concat(
-                ...(options?.interceptor ? [options?.interceptor] : [])
-              ),
-            ],
+      // #region Send the request to the server
+      const response = await client.request({
+        url: options?.path || '/',
+        method: options?.method ?? 'POST',
+        body: body ?? undefined,
+        options: {
+          onProgress: (event) => {
+            if (options?.subject) {
+              options?.subject.next(event);
+            }
+            if (progressObserver) {
+              progressObserver(event);
+            }
           },
-        });
-        if (response.ok) {
-          return response.response as any as R;
-        }
-        throw response.response;
-        //#region Send the request to the server
-      } catch (error) {
-        console.log(error);
-        throw error;
+          responseType: options?.responseType ?? 'text',
+          headers: {
+            Accept:
+              options?.responseType === 'json' ? 'application/json' : '*/*',
+          },
+          interceptors: [
+            ..._interceptors.concat(
+              ...(options?.interceptor ? [options?.interceptor] : [])
+            ),
+          ],
+        },
+      });
+      if (response.ok) {
+        return response.body as any as R;
       }
+      throw (response as unknown as HTTPErrorResponse).error;
+      //#region Send the request to the server
     },
   });
   return uploadClient;
@@ -236,7 +232,7 @@ function uploadClientFactory(
  *
  * @param options
  */
-export function Uploader(options?: UploadOptions<HttpRequest, HttpResponse>) {
+export function Uploader(options?: UploadOptions<HTTPRequest, HTTPResponse>) {
   // Creates the upload client instance
   let uploadClient = uploadClientFactory(options);
   // In case basic authentication configuration is provided by the caller

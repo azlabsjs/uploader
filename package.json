@@ -1,5 +1,5 @@
 {
-    "version": "0.1.12",
+    "version": "0.2.0",
     "license": "MIT",
     "main": "dist/index.js",
     "module": "dist/esm/index.mjs",
@@ -43,11 +43,11 @@
     "size-limit": [
         {
             "path": "dist/cjs/index.cjs",
-            "limit": "10 KB"
+            "limit": "14 KB"
         },
         {
             "path": "dist/esm/index.mjs",
-            "limit": "10 KB"
+            "limit": "14 KB"
         }
     ],
     "devDependencies": {
@@ -75,6 +75,6 @@
         "url": "https://github.com/azlabsjs/uploader.git"
     },
     "dependencies": {
-        "@azlabsjs/requests": "^0.1.15"
+        "@azlabsjs/requests": "^0.2.0"
     }
 }
