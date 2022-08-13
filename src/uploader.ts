@@ -215,7 +215,7 @@ function uploadClientFactory(
       if (response.ok) {
         return response.body as any as R;
       }
-      throw (response as unknown as HTTPErrorResponse).error;
+      throw (response as unknown as HTTPErrorResponse).error ?? response.body;
       //#region Send the request to the server
     },
   });
