@@ -15,16 +15,23 @@ import { isReadableStream, streamToBlob } from './node-api';
 
 import {
   NodeStream,
+  UnknownType,
   UploaderClientType,
   UploaderInterface,
   UploadOptions,
 } from './types';
 
+function makeBase64(value: string) {
+  return typeof Buffer !== 'undefined'
+    ? Buffer.from(value).toString('base64')
+    : btoa(value);
+}
+
 // @internal
 export async function prepareRequestBody(
   data: FormData | Blob | File | NodeStream | string,
   name?: string,
-  params?: Record<string, any>
+  params?: Record<string, UnknownType>
 ) {
   // Initialize body to a null object by default
   let body!: FormData | File | NodeStream | Blob;
@@ -58,14 +65,14 @@ export async function prepareRequestBody(
   } else if (hasParams) {
     // Case parameters are provided, we simply add the parameters to a record of string
     // of form data entry
-    const _body = { [name ?? 'file']: body } as Record<string, any>;
+    const _body = { [name ?? 'file']: body } as Record<string, UnknownType>;
     for (const key in params) {
       _body[key] = params[key];
     }
     return _body;
   } else {
     // Final name case, we simply update the body
-    return { [name ?? 'file']: body } as Record<string, any>;
+    return { [name ?? 'file']: body } as Record<string, UnknownType>;
   }
 }
 
@@ -140,18 +147,13 @@ function uploadClientFactory(
         typeof uploadClient.options.basicAuth !== 'undefined' ||
         uploadClient.options.basicAuth !== null
       ) {
-        const makeBase64Str = (value: string) => {
-          typeof Buffer !== 'undefined'
-            ? Buffer.from(value).toString('base64')
-            : btoa(value);
-        };
         _interceptors.push((request, next) => {
           request = request.clone({
             options: {
               ...request.options,
               headers: {
                 ...request.options?.headers,
-                Authorization: `Basic ${makeBase64Str(
+                Authorization: `Basic ${makeBase64(
                   `${uploadClient.options.basicAuth?.user}:${uploadClient.options.basicAuth?.password}`
                 )}`,
               },
@@ -213,7 +215,7 @@ function uploadClientFactory(
         },
       });
       if (response.ok) {
-        return response.body as any as R;
+        return response.body as unknown as R;
       }
       throw (response as unknown as HTTPErrorResponse).error ?? response.body;
       //#region Send the request to the server

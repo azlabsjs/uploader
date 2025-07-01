@@ -31,9 +31,6 @@
       // error out if import and file system have a casing mismatch. Recommended by TS
       "forceConsistentCasingInFileNames": true,
       "noEmit": true,
-      // Directory where typescript output declaration files
-      "declarationDir": "./dist/types",
-
       // Remove comments from the compiled code
       "removeComments": true
     }

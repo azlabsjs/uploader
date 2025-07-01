@@ -4,6 +4,10 @@ import {
   RequestProgressEvent,
 } from '@azlabsjs/requests';
 
+/** @internal */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type UnknownType = any;
+
 type RequestResponseType =
   | 'arraybuffer'
   | 'blob'
@@ -12,7 +16,7 @@ type RequestResponseType =
   | 'text';
 
 // @internal
-type StreamDataHandlerFunc = (result?: any) => void;
+type StreamDataHandlerFunc = <T = UnknownType>(result?: T) => void;
 
 // @internal
 export type NodeStream = {
@@ -95,7 +99,7 @@ export type UploadOptions<T, R> = {
   /**
    * Configuration for basic authentication for apis protected
    * by a basic authorization gateway
-   * 
+   *
    * @property
    */
   basicAuth?: {

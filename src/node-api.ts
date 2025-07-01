@@ -1,13 +1,8 @@
-/**
- * Converts node stream object to blob instance
- *
- * @internal
- *
- * @param stream
- * @param mimeType
- */
+import { UnknownType } from './types';
+
+/** @description Converts node stream object to blob instance */
 export function streamToBlob(
-  stream: any,
+  stream: UnknownType,
   mimeType = 'application/octet-stream'
 ) {
   if (
@@ -33,11 +28,6 @@ export function streamToBlob(
 }
 
 //@internal
-export function isReadableStream(data: any) {
-  return (
-    typeof data.on !== null &&
-    typeof data.on === 'function' &&
-    typeof data.once !== null &&
-    typeof data.once === 'function'
-  );
+export function isReadableStream(data: UnknownType) {
+  return typeof data.on === 'function' && typeof data.once === 'function';
 }

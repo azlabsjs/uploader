@@ -91,7 +91,7 @@ export function readAs<T = ArrayBuffer | string>(
       if (typeof result === 'undefined' || result === null) {
         return reject('Error while reading file content');
       }
-      resolve(result as any as T);
+      resolve(result as unknown as T);
     });
 
     // Default the read result to
